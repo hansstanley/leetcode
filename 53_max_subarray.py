@@ -1,31 +1,38 @@
-from typing import List
+from typing import List, Tuple
 
-<too slow>
+
 class Solution:
     def maxSubArray(self, nums: List[int]) -> int:
-        max_sum = max(nums)
-        if len(nums) < 2: return max_sum
-        sums = {}
-        for i in range(len(nums)):
-            sums[(i, i + 1)] = nums[i]
-        for i in range(2, len(nums) + 1):
-            next_sums = {}
-            for j in range(0, len(nums) - i + 1):
-                s = next_sums[(j, j + i)] = sums[(j, j + i - 1)] + nums[j + i - 1]
-                max_sum = max(max_sum, s)
-            sums = next_sums
-        return max_sum
-    # def maxSubArray(self, nums: List[int]) -> int:
-    #     max_sum = max(nums)
-    #     if len(nums) < 2: return max_sum
-    #     sums = {}
-    #     for i in range(len(nums)):
-    #         sums[(i, i + 1)] = nums[i]
-    #     for i in range(2, len(nums) + 1):
-    #         mid = i // 2
-    #         for j in range(0, len(nums) - i + 1):
-    #             s = sums[(j, j + i)] = sums[(j, j + mid)] + sums[(j + mid, j + i)]
-    #             max_sum = max(max_sum, s)
-    #     return max_sum
+        return max(self.helper(nums))
 
-print(Solution().maxSubArray([8]))
+    def helper(self, nums: List[int]) -> Tuple[int, int, int, int]:
+        if len(nums) == 0:
+            return 0, 0, 0, 0
+        if len(nums) == 1:
+            return nums[0], nums[0], nums[0], nums[0]
+        mid = len(nums) // 2
+        ll, lm, lr, l_local = self.helper(nums[:mid])
+        rl, rm, rr, r_local = self.helper(nums[mid:])
+        local_l = max(lm, lr)
+        local_r = max(rl, rm)
+        if local_l < 0 or local_r < 0:
+            local = max(local_l, local_r)
+        else:
+            local = local_l + local_r
+        return (
+            max(ll, lm + max(rl, rm, 0)),
+            lm + rm,
+            max(rr, rm + max(lr, lm, 0)),
+            max(l_local, r_local, local),
+        )
+
+    # def maxSubArray(self, nums: List[int], curr: int = 0) -> int:
+    #     if len(nums) == 0:
+    #         return curr
+    #     return max(
+    #         self.maxSubArray(nums[1:], curr + nums[0]),
+    #         self.maxSubArray(nums[1:], nums[0]),
+    #     )
+
+
+print(Solution().maxSubArray([-2, 1, -3, 4, -1, 2, 1, -5, 4]))
